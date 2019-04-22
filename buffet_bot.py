@@ -25,27 +25,30 @@ def is_date(string):
     :param fuzzy: bool, ignore unknown tokens in string if True
     """
     try:
-        return(parse(string, fuzzy=True, dayfirst=True).strftime('%d.%m.%y'))
+        return(parse(string, dayfirst=True).strftime('%d.%m.%y'))
     except:
         return False
 
 
 def get_menu_dict(url):
     page = requests.get(url)
-    dfs = pd.read_html(page.content.decode('latin-1'))
-    df = dfs[5].iloc[:, [0, 1]]
     food = {}
-    for i in range(0, df.shape[0]):
-        if is_date(df.iloc[i, 0]) and is_date(df.iloc[i, 1]) and df.iloc[i, 0] == df.iloc[i, 1]:
-            thedate = is_date(df.iloc[i, 0])
-            food[thedate] = []
-        else:
-            try:
-                food[thedate].append({'type': df.iloc[i, 0].split(',', maxsplit=1)[
-                    0], 'price': df.iloc[i, 0].split(',', maxsplit=1)[1], 'what': df.iloc[i, 1]})
-            except:
-                continue
-    return(food)
+    try:
+        dfs = pd.read_html(page.content.decode('latin-1'))
+        df = dfs[5].iloc[:, [0, 1]]
+        for i in range(0, df.shape[0]):
+            if is_date(df.iloc[i, 0]) and is_date(df.iloc[i, 1]) and df.iloc[i, 0] == df.iloc[i, 1]:
+                thedate = is_date(df.iloc[i, 0])
+                food[thedate] = []
+            else:
+                try:
+                    food[thedate].append({'type': df.iloc[i, 0].split(',', maxsplit=1)[
+                        0], 'price': df.iloc[i, 0].split(',', maxsplit=1)[1], 'what': df.iloc[i, 1]})
+                except:
+                    continue
+        return(food)
+    except:
+        return(food)
 
 
 def date_of_day():
@@ -111,7 +114,8 @@ To get the menu of the day in English: @buffetok menu english
 To get the menu for a specific date: @buffetok menu dd.mm.yyyy
         """
     channel = 'buffet-ok'
-    URL = "http://www.buffet-ok.de/mittag/bestellung.php?plus=0&bezeichnung=2"
+    URL1 = "http://www.buffet-ok.de/mittag/bestellung.php?plus=-1&bezeichnung=2"
+    URL2 = "http://www.buffet-ok.de/mittag/bestellung.php?plus=0&bezeichnung=2"
 
     for event in slack_events:
         # only message from users
@@ -127,7 +131,9 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                     post_annotation(TOKEN, text=help_text, channel=channel)
 
                 elif 'menu' in text_received:
-                    menu = get_menu_dict(URL)
+                    menu_week1 = get_menu_dict(URL1)
+                    menu_week2 = get_menu_dict(URL2)
+                    menu = {**menu_week1, **menu_week2}
                     if any([w in text_received for w in ['en', 'english']]):
                         for i in text_received:
                             if is_date(i):
@@ -143,6 +149,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                                 break
                             else:
                                 thedate = date_of_day()
+                                print(date_of_day())
                         menu_text = get_food_day(menu, thedate, 'de')
                     post_annotation(TOKEN, text=menu_text, channel=channel)
 
