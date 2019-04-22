@@ -17,7 +17,7 @@ def _get_args():
     return(token)
 
 
-def is_date(string, fuzzy=False):
+def is_date(string):
     """
     Return whether the string can be interpreted as a date.
 
@@ -25,10 +25,8 @@ def is_date(string, fuzzy=False):
     :param fuzzy: bool, ignore unknown tokens in string if True
     """
     try:
-        parse(string, fuzzy=fuzzy)
-        return True
-
-    except ValueError:
+        return(parse(string, fuzzy=True, dayfirst=True).strftime('%d.%m.%y'))
+    except:
         return False
 
 
@@ -39,7 +37,7 @@ def get_menu_dict(url):
     food = {}
     for i in range(0, df.shape[0]):
         if is_date(df.iloc[i, 0]) and is_date(df.iloc[i, 1]) and df.iloc[i, 0] == df.iloc[i, 1]:
-            thedate = df.iloc[i, 0]
+            thedate = is_date(df.iloc[i, 0])
             food[thedate] = []
         else:
             try:
@@ -120,6 +118,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
         if event['type'] == 'message' and not 'subtype' in event:
             # get the user_id and the text of the post
             user_id, text_received, channel = event['user'], event['text'], event['channel']
+            print(text_received)
             text_received = text_received.split(" ")
             # the bot is activated only if we mention it
             if f"<@{buffetbot_id}>" in text_received:
@@ -132,7 +131,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                     if any([w in text_received for w in ['en', 'english']]):
                         for i in text_received:
                             if is_date(i):
-                                thedate = i
+                                thedate = is_date(i)
                                 break
                             else:
                                 thedate = date_of_day()
@@ -140,7 +139,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                     else:
                         for i in text_received:
                             if is_date(i):
-                                thedate = i
+                                thedate = is_date(i)
                                 break
                             else:
                                 thedate = date_of_day()
