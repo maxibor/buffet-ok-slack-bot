@@ -149,7 +149,6 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                                 break
                             else:
                                 thedate = date_of_day()
-                                print(date_of_day())
                         menu_text = get_food_day(menu, thedate, 'de')
                     post_annotation(TOKEN, text=menu_text, channel=channel)
 
