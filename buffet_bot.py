@@ -125,7 +125,8 @@ To get the menu for a specific date: @buffet-ok menu dd.mm.yyyy
             text_received = text_received.split(" ")
             # the bot is activated only if we mention it
             if f"<@{buffetbot_id}>" in text_received:
-                print(text_received)
+                print(
+                    f"user_id: {user_id}, channel: {channel}, text: {text_received}")
                 # Activate help if 'help' or 'sos' in the post
                 if any([k in text_received for k in ['help', 'sos']]):
                     post_annotation(TOKEN, text=help_text, channel=channel)
