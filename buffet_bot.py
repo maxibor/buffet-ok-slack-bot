@@ -134,7 +134,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                     menu_week1 = get_menu_dict(URL1)
                     menu_week2 = get_menu_dict(URL2)
                     menu = {**menu_week1, **menu_week2}
-                    if any([w in text_received for w in ['en', 'english']]):
+                    if any([w.lower() in text_received for w in ['en', 'english']]):
                         for i in text_received:
                             if is_date(i):
                                 thedate = is_date(i)
