@@ -90,9 +90,9 @@ def post_annotation(token, text=None, channel='bot', response_to=''):
     # Pre-defined message
     if not text:
         text = f"""
-To get the menu of the day, please call me: @buffetok menu
-To get the menu of the day in English: @buffetok menu english
-To get the menu for a specific date: @buffetok menu dd.mm.yyyy
+To get the menu of the day, please call me: @buffet-ok menu
+To get the menu of the day in English: @buffet-ok menu english
+To get the menu for a specific date: @buffet-ok menu dd.mm.yyyy
         """
 
     # Post message
@@ -110,8 +110,8 @@ def parse_bot_commands(slack_events):
 
     help_text = f"""
 To get the menu of the day: @buffetok menu
-To get the menu of the day in English: @buffetok menu english
-To get the menu for a specific date: @buffetok menu dd.mm.yyyy
+To get the menu of the day in English: @buffet-ok menu english
+To get the menu for a specific date: @buffet-ok menu dd.mm.yyyy
         """
     channel = 'buffet-ok'
     URL1 = "http://www.buffet-ok.de/mittag/bestellung.php?plus=-1&bezeichnung=2"
@@ -123,7 +123,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
             # get the user_id and the text of the post
             user_id, text_received, channel = event['user'], event['text'], event['channel']
             print(text_received)
-            text_received = text_received.split(" ")
+            text_received = text_received.lower().split(" ")
             # the bot is activated only if we mention it
             if f"<@{buffetbot_id}>" in text_received:
                 # Activate help if 'help' or 'sos' in the post
@@ -134,7 +134,7 @@ To get the menu for a specific date: @buffetok menu dd.mm.yyyy
                     menu_week1 = get_menu_dict(URL1)
                     menu_week2 = get_menu_dict(URL2)
                     menu = {**menu_week1, **menu_week2}
-                    if any([w.lower() in text_received for w in ['en', 'english']]):
+                    if any([w in text_received for w in ['en', 'english']]):
                         for i in text_received:
                             if is_date(i):
                                 thedate = is_date(i)
