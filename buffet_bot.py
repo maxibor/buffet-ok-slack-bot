@@ -162,12 +162,15 @@ if __name__ == '__main__':
     TOKEN = _get_args()
 
     slack_client = SlackClient(TOKEN)
-    if slack_client.rtm_connect(with_team_state=False):
+    if slack_client.rtm_connect(with_team_state=False, auto_reconnect=True):
         print("Starter Bot connected and running!")
         buffetbot_id = slack_client.api_call('auth.test')['user_id']
         print(buffetbot_id)
         while True:
-            parse_bot_commands(slack_client.rtm_read())
-            time.sleep(1)
+            try:
+                parse_bot_commands(slack_client.rtm_read())
+                time.sleep(1)
+            except:
+                time.sleep(10)
     else:
         print("Connection failed. Exception traceback printed above.")
