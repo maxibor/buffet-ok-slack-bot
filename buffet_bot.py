@@ -162,7 +162,7 @@ if __name__ == '__main__':
     TOKEN = _get_args()
 
     slack_client = SlackClient(TOKEN)
-    if slack_client.rtm_connect(with_team_state=False, auto_reconnect=True):
+    if slack_client.rtm_connect(auto_reconnect=True):
         print("Starter Bot connected and running!")
         buffetbot_id = slack_client.api_call('auth.test')['user_id']
         print(buffetbot_id)
