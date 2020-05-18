@@ -6,6 +6,8 @@ import requests
 import pandas as pd
 from googletrans import Translator
 import time
+from bs4 import BeautifulSoup
+import requests
 
 
 def _get_args():
@@ -25,25 +27,32 @@ def is_date(string):
     :param fuzzy: bool, ignore unknown tokens in string if True
     """
     try:
-        return(parse(string, dayfirst=True).strftime('%d.%m.%y'))
+        thedate = parse(string, dayfirst=True).strftime("%d.%m.%Y")
+        return(thedate)
     except:
         return False
 
 
 def get_menu_dict(url):
-    page = requests.get(url)
     food = {}
     try:
-        dfs = pd.read_html(page.content.decode('latin-1'))
-        df = dfs[5].iloc[:, [0, 1]]
-        for i in range(0, df.shape[0]):
-            if is_date(df.iloc[i, 0]) and is_date(df.iloc[i, 1]) and df.iloc[i, 0] == df.iloc[i, 1]:
-                thedate = is_date(df.iloc[i, 0])
-                food[thedate] = []
-            else:
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        choices = soup.find_all('fieldset')
+        for day in choices[1:]:
+            theday = day.select('legend')
+            labels = day.select('label')
+            thisday = theday[0].string.split()[1]
+            food[thisday] = []
+
+            for label in labels:
+                thefood = label.string
+                foodtype = thefood.split()[0]
+                theprice = thefood.split()[1]
+                thewhat = thefood.split("-")[1]
                 try:
-                    food[thedate].append({'type': df.iloc[i, 0].split(',', maxsplit=1)[
-                        0], 'price': df.iloc[i, 0].split(',', maxsplit=1)[1], 'what': df.iloc[i, 1]})
+                    food[thisday].append(
+                        {'type': foodtype, 'price': theprice, 'what': thewhat})
                 except:
                     continue
         return(food)
@@ -52,7 +61,7 @@ def get_menu_dict(url):
 
 
 def date_of_day():
-    return(str(datetime.datetime.today().date().strftime('%d.%m.%y')))
+    return(str(datetime.datetime.today().date().strftime('%d.%m.%Y')))
 
 
 def get_food_day(menu_dict, theday, lang='en'):
@@ -114,8 +123,8 @@ To get the menu of the day in English: @buffet-ok menu english
 To get the menu for a specific date: @buffet-ok menu dd.mm.yyyy
         """
     channel = 'buffet-ok'
-    URL1 = "http://www.buffet-ok.de/mittag/bestellung.php?plus=-1&bezeichnung=2"
-    URL2 = "http://www.buffet-ok.de/mittag/bestellung.php?plus=0&bezeichnung=2"
+    URL1 = "https://www.buffet-ok.de/mittagessen-bestellen/mittagessen-bestellen-1.html"
+    URL2 = "https://www.buffet-ok.de/mittagessen-bestellen/mittagessen-bestellen-2.html"
 
     for event in slack_events:
         # only message from users
